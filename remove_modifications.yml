@@ -1,0 +1,16 @@
+---
+- hosts: all
+  become: true
+  tasks:
+    - name: remove all installed packages for tutorial
+      package:
+        name:
+          - "{{ apache_package }}"
+          - "{{ php_package }}"
+          - "{{ mariadb_package }}"
+        state: absent
+
+    - name: remove index html file if it exists
+      ansible.builtin.file:
+        path: /var/www/html/index.html
+        state: absent
