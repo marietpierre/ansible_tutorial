@@ -1,28 +1,17 @@
-- name: install apache and php (Ubuntu)
-  tags: apache,apache2,ubuntu
-  apt:
+- name: install apache and php
+  tags: apache2,,httpd,php
+  package:
     name:
-      - apache2
-      - libapache2-mod-php
+      - "{{ apache_package }}"
+      - "{{ php_package }}"
     state: latest
-  when: ansible_facts['distribution'] == "Ubuntu"
 
-- name: install apache and php (CentOS)
-  tags: apache,httpd,centos
-  dnf:
-    name:
-      - httpd
-      - php
-    state: latest
-  when: ansible_facts['distribution'] == "CentOS"
-
-- name: start httpd (CentOS)
-  tags: apache,centos,httpd
+- name: start and enable apache service
+  tags: apache,httpd
   service:
-    name: httpd
+    name: "{{ apache_service }}"
     state: started
     enabled: yes
-  when: ansible_facts['distribution'] == "CentOS"
 
 - name: change e-mail address for admin (CentOS)
   tags: apache,centos,httpd
@@ -39,14 +28,7 @@
     regexp: "^#ServerName"
     line: ServerName {{ inventory_hostname }}
   when: ansible_facts['distribution'] == "CentOS"
-  register: httpd
-
-- name: restart httpd (CentOS)
-  tags: apache,centos,httpd
-  service:
-    name: httpd
-    state: restarted
-  when: httpd.changed
+  notify: restart_apache
 
 - name: copy default html file for site
   tags: apache,apache2,httpd
